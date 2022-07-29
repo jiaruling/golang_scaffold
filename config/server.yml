@@ -1,0 +1,70 @@
+# 服务启动
+run:
+  name: "GolangScaffold"
+  env: "dev"     # 可选参数【dev test product】
+  runMode: "debug" # 可选参数 【debug release】
+  systemVersion: "GolangScaffold" # 系统环境变量的key
+  ip: "0.0.0.0"
+  port: "8888"
+
+# swagger
+swagger:
+  title: "gin_scaffold swagger API"
+  desc: "This is a sample server celler server."
+  host: "127.0.0.1:8880"
+  base_path: ""
+  version: "1.0"
+
+# 日志
+log:
+  appName: "scaffold"
+  logFileDir: ""
+  maxSize: 1
+  maxBackups: 7
+  maxAge: 7
+  dev: true
+
+# 后台任务配置
+task:
+  task1:
+    interval: 24 # 单位: 小时
+  task2:
+    interval: 1 # 单位: 小时
+  task3:
+    interval: 1 # 单位: 小时
+  task4:
+    interval: 1 # 单位: 小时
+  task5:
+    interval: 30 # 单位: 秒
+
+# 数据库数组
+mysql:
+  -
+    name: "Write"
+    user: "root"
+    password: "abc123456"
+    ip: "192.168.0.142"
+    port: 3366
+    db: "gm_customer_service_system"
+    parameter: "charset=utf8mb4&parseTime=True&loc=Local"
+  -
+    name: "Read"
+    user: "root"
+    password: "abc123456"
+    ip: "192.168.0.142"
+    port: 3366
+    db: "gm_customer_service_system"
+    parameter: "charset=utf8mb4&parseTime=True&loc=Local"
+redis:
+  -
+    name: "Write"
+    ip: "192.168.0.142"
+    port: 6379
+    password: "abc123456"
+    db: 1
+  -
+    name: "Read"
+    ip: "192.168.0.142"
+    port: 6379
+    password: "abc123456"
+    db: 1

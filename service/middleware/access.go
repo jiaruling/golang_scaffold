@@ -1,0 +1,67 @@
+package middleware
+
+import (
+	"bytes"
+	"github.com/gin-gonic/gin"
+	"github.com/jiaruling/golang_utils/lib"
+	"io/ioutil"
+	"time"
+)
+
+// 请求进入日志
+func RequestInLog(c *gin.Context) {
+	traceContext := lib.NewTrace()
+	if traceId := c.Request.Header.Get("com-header-rid"); traceId != "" {
+		traceContext.TraceId = traceId
+	}
+	if spanId := c.Request.Header.Get("com-header-spanid"); spanId != "" {
+		traceContext.SpanId = spanId
+	}
+
+	c.Set("startExecTime", time.Now())
+	c.Set("trace", traceContext)
+
+	bodyBytes, _ := ioutil.ReadAll(c.Request.Body)
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes)) // Write body back
+
+	log := lib.GetLog()
+	log.Info(traceContext, lib.DLTagRequestIn, map[string]interface{}{
+		"uri":    c.Request.RequestURI,
+		"method": c.Request.Method,
+		"args":   c.Request.PostForm,
+		"body":   string(bodyBytes),
+		"from":   c.ClientIP(),
+	})
+}
+
+// 请求输出日志
+func RequestOutLog(c *gin.Context) {
+	// after request
+	endExecTime := time.Now()
+	response, _ := c.Get("response")
+	st, _ := c.Get("startExecTime")
+	trace, _ := c.Get("trace")
+	traceContext, ok := trace.(*lib.TraceContext)
+	if !ok {
+		traceContext = lib.NewTrace()
+	}
+
+	startExecTime, _ := st.(time.Time)
+
+	lib.GetLog().Info(traceContext, lib.DLTagRequestOut, map[string]interface{}{
+		"uri":       c.Request.RequestURI,
+		"method":    c.Request.Method,
+		"args":      c.Request.PostForm,
+		"from":      c.ClientIP(),
+		"response":  response,
+		"proc_time": endExecTime.Sub(startExecTime).Milliseconds(),
+	})
+}
+
+func RequestLog() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		RequestInLog(c)
+		defer RequestOutLog(c)
+		c.Next()
+	}
+}
